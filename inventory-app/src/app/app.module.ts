@@ -1,15 +1,14 @@
-import { BrowserModule } from '@angular/platform-browser';
+import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpModule } from '@angular/http';
-
-
+import { BrowserModule } from '@angular/platform-browser';
 import { AppComponent } from './app.component';
-import { ProductsListComponent } from './products-list/products-list.component';
-import { ProductRowComponent } from './product-row/product-row.component';
-import { ProductImageComponent } from './product-image/product-image.component';
 import { PriceDisplayComponent } from './price-display/price-display.component';
 import { ProductDepartmentComponent } from './product-department/product-department.component';
+import { ProductImageComponent } from './product-image/product-image.component';
+import { ProductRowComponent } from './product-row/product-row.component';
+import { ProductsListComponent } from './products-list/products-list.component';
+
 
 
 @NgModule({
@@ -24,7 +23,7 @@ import { ProductDepartmentComponent } from './product-department/product-departm
   imports: [
     BrowserModule,
     FormsModule,
-    HttpModule
+    HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]
