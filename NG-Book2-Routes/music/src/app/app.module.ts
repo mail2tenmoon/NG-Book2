@@ -1,13 +1,15 @@
-import { BrowserModule } from '@angular/platform-browser';
+import {
+  APP_BASE_HREF,
+  HashLocationStrategy,
+  LocationStrategy
+} from '@angular/common';
+import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule, Routes } from '@angular/router';
-import { LocationStrategy, HashLocationStrategy, APP_BASE_HREF } from '@angular/common';
-
-
-import { AppComponent } from './app.component';
 import { AlbumComponent } from './album/album.component';
+import { AppComponent } from './app.component';
 import { ArtistComponent } from './artist/artist.component';
 import { SearchComponent } from './search/search.component';
 import { SPOTIFY_PROVIDERS } from './spotify.service';
@@ -18,9 +20,8 @@ const routes: Routes = [
   { path: 'search', component: SearchComponent },
   { path: 'artists/:id', component: ArtistComponent },
   { path: 'tracks/:id', component: TrackComponent },
-  { path: 'albums/:id', component: AlbumComponent },
+  { path: 'albums/:id', component: AlbumComponent }
 ];
-
 
 @NgModule({
   declarations: [
@@ -38,9 +39,9 @@ const routes: Routes = [
   ],
   providers: [
     SPOTIFY_PROVIDERS,
-    {provide: APP_BASE_HREF, useValue: '/'},
+    { provide: APP_BASE_HREF, useValue: '/' },
     { provide: LocationStrategy, useClass: HashLocationStrategy }
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {}
