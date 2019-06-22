@@ -1,24 +1,20 @@
-import { BrowserModule } from '@angular/platform-browser';
+import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpModule } from '@angular/http';
+import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule, Routes } from '@angular/router';
-
-import {
-  routes as childRoutes,
-  ProductsModule
-} from './products/products.module';
-
-import { AppComponent } from './app.component';
-import { LocationStrategy, HashLocationStrategy, APP_BASE_HREF } from '@angular/common';
-import { HomeComponent } from './home/home.component';
 import { AboutComponent } from './about/about.component';
-import { ContactComponent } from './contact/contact.component';
-import { LoginComponent } from './login/login.component';
-import { ProtectedComponent } from './protected/protected.component';
-import { LoggedInGuard } from './logged-in.guard';
+import { AppComponent } from './app.component';
 import { AUTH_PROVIDERS } from './auth.service';
+import { ContactComponent } from './contact/contact.component';
+import { HomeComponent } from './home/home.component';
+import { LoggedInGuard } from './logged-in.guard';
+import { LoginComponent } from './login/login.component';
 import { ProductsComponent } from './products/products.component';
+import { ProductsModule, routes as childRoutes } from './products/products.module';
+import { ProtectedComponent } from './protected/protected.component';
+
+
 
 const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -43,7 +39,7 @@ const routes: Routes = [
   imports: [
     BrowserModule,
     FormsModule,
-    HttpModule,
+    HttpClientModule,
     RouterModule.forRoot(routes),
 
     ProductsModule
