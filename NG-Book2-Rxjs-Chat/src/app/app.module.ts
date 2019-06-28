@@ -1,20 +1,20 @@
-import { BrowserModule } from '@angular/platform-browser';
+import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpModule } from '@angular/http';
-
-import { UsersService } from './user/users.service';
-import { ThreadsService } from './thread/threads.service';
-import { MessagesService } from './message/messages.service';
-
+import { BrowserModule } from '@angular/platform-browser';
 import { AppComponent } from './app.component';
 import { ChatMessageComponent } from './chat-message/chat-message.component';
-import { ChatThreadComponent } from './chat-thread/chat-thread.component';
 import { ChatNavBarComponent } from './chat-nav-bar/chat-nav-bar.component';
+import { ChatPageComponent } from './chat-page/chat-page.component';
+import { ChatThreadComponent } from './chat-thread/chat-thread.component';
 import { ChatThreadsComponent } from './chat-threads/chat-threads.component';
 import { ChatWindowComponent } from './chat-window/chat-window.component';
-import { ChatPageComponent } from './chat-page/chat-page.component';
+import { MessagesService } from './message/messages.service';
 import { FromNowPipe } from './pipes/from-now.pipe';
+import { ThreadsService } from './thread/threads.service';
+import { UsersService } from './user/users.service';
+
+
 
 @NgModule({
   declarations: [
@@ -30,7 +30,7 @@ import { FromNowPipe } from './pipes/from-now.pipe';
   imports: [
     BrowserModule,
     FormsModule,
-    HttpModule
+    HttpClientModule
   ],
   providers: [
     MessagesService, ThreadsService, UsersService
