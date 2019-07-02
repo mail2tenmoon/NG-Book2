@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Subject, BehaviorSubject, Observable } from 'rxjs';
-import { Thread } from './thread.model';
+import * as _ from 'lodash';
+import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Message } from '../message/message.model';
 import { MessagesService } from '../message/messages.service';
-import * as _ from 'lodash';
+import { Thread } from './thread.model';
 
 @Injectable()
 export class ThreadsService {
@@ -21,35 +22,39 @@ export class ThreadsService {
   currentThreadMessages: Observable<Message[]>;
 
   constructor(public messagesService: MessagesService) {
-    this.threads = messagesService.messages.map((messages: Message[]) => {
-      const threads: { [key: string]: Thread } = {};
-      // Store the message's thread in our accumulator `threads`
-      messages.map((message: Message) => {
-        threads[message.thread.id] =
-          threads[message.thread.id] || message.thread;
+    this.threads = messagesService.messages.pipe(
+      map((messages: Message[]) => {
+        const threads: { [key: string]: Thread } = {};
+        // Store the message's thread in our accumulator `threads`
+        messages.map((message: Message) => {
+          threads[message.thread.id] =
+            threads[message.thread.id] || message.thread;
 
-        // Cache the most recent message for each thread
-        const messagesThread: Thread = threads[message.thread.id];
-        if (
-          !messagesThread.lastMessage ||
-          messagesThread.lastMessage.sentAt < message.sentAt
-        ) {
-          messagesThread.lastMessage = message;
-        }
-      });
-      return threads;
-    });
-
-    this.orderedThreads = this.threads.map(
-      (threadGroups: { [key: string]: Thread }) => {
-        const threads: Thread[] = _.values(threadGroups);
-        return _.sortBy(threads, (t: Thread) => t.lastMessage.sentAt).reverse();
-      }
+          // Cache the most recent message for each thread
+          const messagesThread: Thread = threads[message.thread.id];
+          if (
+            !messagesThread.lastMessage ||
+            messagesThread.lastMessage.sentAt < message.sentAt
+          ) {
+            messagesThread.lastMessage = message;
+          }
+        });
+        return threads;
+      })
     );
 
-    this.currentThreadMessages = this.currentThread.combineLatest(
-      messagesService.messages,
-      (currentThread: Thread, messages: Message[]) => {
+    this.orderedThreads = this.threads.pipe(
+      map((threadGroups: { [key: string]: Thread }) => {
+        const threads: Thread[] = _.values(threadGroups);
+        return _.sortBy(threads, (t: Thread) => t.lastMessage.sentAt).reverse();
+      })
+    );
+
+    this.currentThreadMessages = combineLatest([
+      this.currentThread,
+      messagesService.messages
+    ]).pipe(
+      map(([currentThread, messages]: [Thread, Message[]]) => {
         if (currentThread && messages.length > 0) {
           return _.chain(messages)
             .filter(
@@ -63,7 +68,7 @@ export class ThreadsService {
         } else {
           return [];
         }
-      }
+      })
     );
 
     this.currentThread.subscribe(this.messagesService.markThreadAsRead);

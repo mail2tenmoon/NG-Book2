@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Subject, Observable } from 'rxjs';
-import { User } from '../user/user.model';
-import { Thread } from '../thread/thread.model';
+import { Observable, Subject } from 'rxjs';
+import { filter, map, publishReplay, refCount, scan } from 'rxjs/operators';
 import { Message } from '../message/message.model';
+import { Thread } from '../thread/thread.model';
+import { User } from '../user/user.model';
 
 const initialMessages: Message[] = [];
 
@@ -32,16 +33,17 @@ export class MessagesService {
   markThreadAsRead: Subject<any> = new Subject<any>();
 
   constructor() {
-    this.messages = this.updates
+    this.messages = this.updates.pipe(
       // watch the updates and accumulate operations on the messages
-      .scan((messages: Message[], operation: IMessagesOperation) => {
+      scan((messages: Message[], operation: IMessagesOperation) => {
         return operation(messages);
-      }, initialMessages)
+      }, initialMessages),
       // make sure we can share the most recent list of messages across anyone
       // who's interested in subscribing and cache the last known list of
       // messages
-      .publishReplay(1)
-      .refCount();
+      publishReplay(1),
+      refCount()
+    );
 
     // `create` takes a Message and then puts an operation (the inner function)
     // on the `updates` stream to add the Message to the list of messages.
@@ -58,11 +60,13 @@ export class MessagesService {
     // entirely. The pros are that it is potentially clearer. The cons are that
     // the stream is no longer composable.
     this.create
-      .map(function(message: Message): IMessagesOperation {
-        return (messages: Message[]) => {
-          return messages.concat(message);
-        };
-      })
+      .pipe(
+        map(function(message: Message): IMessagesOperation {
+          return (messages: Message[]) => {
+            return messages.concat(message);
+          };
+        })
+      )
       .subscribe(this.updates);
 
     this.newMessages.subscribe(this.create);
@@ -70,19 +74,21 @@ export class MessagesService {
     // similarly, `markThreadAsRead` takes a Thread and then puts an operation
     // on the `updates` stream to mark the Messages as read
     this.markThreadAsRead
-      .map((thread: Thread) => {
-        return (messages: Message[]) => {
-          return messages.map((message: Message) => {
-            // note that we're manipulating `message` directly here. Mutability
-            // can be confusing and there are lots of reasons why you might want
-            // to, say, copy the Message object or some other 'immutable' here
-            if (message.thread.id === thread.id) {
-              message.isRead = true;
-            }
-            return message;
-          });
-        };
-      })
+      .pipe(
+        map((thread: Thread) => {
+          return (messages: Message[]) => {
+            return messages.map((message: Message) => {
+              // note that we're manipulating `message` directly here. Mutability
+              // can be confusing and there are lots of reasons why you might want
+              // to, say, copy the Message object or some other 'immutable' here
+              if (message.thread.id === thread.id) {
+                message.isRead = true;
+              }
+              return message;
+            });
+          };
+        })
+      )
       .subscribe(this.updates);
   }
 
@@ -92,14 +98,16 @@ export class MessagesService {
   }
 
   messagesForThreadUser(thread: Thread, user: User): Observable<Message> {
-    return this.newMessages.filter((message: Message) => {
-      // belongs to this thread
-      return (
-        message.thread.id === thread.id &&
-        // and isn't authored by this user
-        message.author.id !== user.id
-      );
-    });
+    return this.newMessages.pipe(
+      filter((message: Message) => {
+        // belongs to this thread
+        return (
+          message.thread.id === thread.id &&
+          // and isn't authored by this user
+          message.author.id !== user.id
+        );
+      })
+    );
   }
 }
 
